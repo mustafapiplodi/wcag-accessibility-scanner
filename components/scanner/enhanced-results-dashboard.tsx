@@ -4,8 +4,10 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { EnhancedViolationList } from "./enhanced-violation-list"
+import { ViolationCharts } from "@/components/charts/violation-charts"
+import { ExportMenu } from "@/components/export-menu"
 import type { ScanResult } from "@/lib/scanner/types"
-import { AlertCircle, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Download, Share2 } from "lucide-react"
+import { AlertCircle, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Share2 } from "lucide-react"
 import { motion } from "framer-motion"
 import confetti from "canvas-confetti"
 import { Button } from "@/components/ui/button"
@@ -136,11 +138,7 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </Tooltip>
-                <Tooltip content="Export report">
-                  <Button variant="outline" size="sm" onClick={handleExport}>
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </Tooltip>
+                <ExportMenu results={results} />
               </div>
             </div>
           </CardHeader>
@@ -306,6 +304,18 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+      )}
+
+      {/* Data Visualization */}
+      {totalViolations > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <h2 className="text-2xl font-bold mb-4">Violation Analytics</h2>
+          <ViolationCharts results={results} />
         </motion.div>
       )}
 
