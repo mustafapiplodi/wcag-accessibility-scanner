@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { Toast } from "@/components/ui/toast"
 
 export const metadata: Metadata = {
   title: "WCAG Accessibility Scanner | Free WCAG 2.2 Compliance Testing",
@@ -24,7 +24,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster />
+          <Toast />
         </ThemeProvider>
       </body>
     </html>
