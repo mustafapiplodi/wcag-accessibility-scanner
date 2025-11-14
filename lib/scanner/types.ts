@@ -44,3 +44,6 @@ export interface ScanOptions {
   wcagLevel?: 'A' | 'AA' | 'AAA'
   runOnly?: string[]
 }
+
+// Re-export crawler types for convenience
+export type { CrawlProgress, CrawlResult, CrawlerOptions } from './crawler'
