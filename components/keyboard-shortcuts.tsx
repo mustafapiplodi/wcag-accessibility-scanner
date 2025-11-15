@@ -15,10 +15,22 @@ interface KeyboardShortcutsProps {
   onNewScan?: () => void
   onCompare?: () => void
   onExport?: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function KeyboardShortcuts({ onNewScan, onCompare, onExport }: KeyboardShortcutsProps) {
+export function KeyboardShortcuts({ onNewScan, onCompare, onExport, open, onOpenChange }: KeyboardShortcutsProps) {
   const [showModal, setShowModal] = useState(false)
+
+  // Allow external control of modal
+  const isOpen = open !== undefined ? open : showModal
+  const setIsOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value)
+    } else {
+      setShowModal(value)
+    }
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,12 +64,12 @@ export function KeyboardShortcuts({ onNewScan, onCompare, onExport }: KeyboardSh
       // Ctrl/Cmd + /: Show keyboard shortcuts
       if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault()
-        setShowModal(true)
+        setIsOpen(true)
       }
 
       // Escape: Close modal
       if (e.key === 'Escape') {
-        setShowModal(false)
+        setIsOpen(false)
       }
     }
 
@@ -79,7 +91,7 @@ export function KeyboardShortcuts({ onNewScan, onCompare, onExport }: KeyboardSh
 
   return (
     <>
-      <Dialog open={showModal} onOpenChange={setShowModal}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">

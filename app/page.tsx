@@ -11,9 +11,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { LoadingCard } from "@/components/ui/loading"
 import type { ScanResult, CrawlResult, CrawlProgress } from "@/lib/scanner/types"
+import { demoScanResult } from "@/lib/demo-data"
 import toast from "react-hot-toast"
 import { motion, AnimatePresence } from "framer-motion"
-import { GitCompare } from "lucide-react"
+import { GitCompare, Eye } from "lucide-react"
 
 // Lazy load heavy components for better performance
 const EnhancedResultsDashboard = lazy(() => import("@/components/scanner/enhanced-results-dashboard").then(mod => ({ default: mod.EnhancedResultsDashboard })))
@@ -28,6 +29,7 @@ export default function Home() {
   const [crawlResults, setCrawlResults] = useState<CrawlResult | null>(null)
   const [crawlProgress, setCrawlProgress] = useState<CrawlProgress | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   const handleScan = async (url: string, options: { wcagLevel: string }) => {
     setIsScanning(true)
@@ -107,16 +109,31 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleViewDemo = () => {
+    setResults(demoScanResult)
+    setViewMode('scan')
+    toast.success('Viewing demo report')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <main className="min-h-screen bg-background">
       {/* Keyboard Shortcuts */}
       <KeyboardShortcuts
         onNewScan={handleNewScan}
         onCompare={() => setViewMode('compare')}
+        open={showKeyboardShortcuts}
+        onOpenChange={setShowKeyboardShortcuts}
       />
 
       {/* Header */}
-      <Header showNewScanButton={!!(results || crawlResults)} onNewScan={handleNewScan} />
+      <Header
+        showNewScanButton={!!(results || crawlResults)}
+        showCompareButton={!!(results || crawlResults)}
+        onNewScan={handleNewScan}
+        onCompare={() => setViewMode('compare')}
+        onShowKeyboardShortcuts={() => setShowKeyboardShortcuts(true)}
+      />
 
       {/* Main Content */}
       <div id="main-content" className="container mx-auto px-4 py-8 space-y-8">
@@ -157,6 +174,24 @@ export default function Home() {
                     Automatically scan your website for WCAG compliance issues and get actionable
                     remediation guidance to prevent ADA lawsuits and improve web accessibility.
                   </p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <Button
+                      onClick={handleViewDemo}
+                      variant="outline"
+                      size="lg"
+                      className="gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Demo Report
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      See what a scan report looks like before testing your own site
+                    </p>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -231,7 +266,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
           >
             <Suspense fallback={<LoadingCard />}>
-              <EnhancedResultsDashboard results={results} />
+              <EnhancedResultsDashboard results={results} onCompare={() => setViewMode('compare')} />
             </Suspense>
           </motion.div>
         )}

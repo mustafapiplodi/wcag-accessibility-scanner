@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Search, Clock, Clipboard, X, ChevronDown } from "lucide-react"
 import { Tooltip } from "@/components/ui/tooltip"
+import { InfoTooltip } from "@/components/ui/info-tooltip"
 import { motion, AnimatePresence } from "framer-motion"
 import toast from "react-hot-toast"
 
@@ -283,9 +284,7 @@ export function EnhancedScanForm({ onScan, isScanning }: EnhancedScanFormProps) 
           <div className="space-y-2">
             <label htmlFor="wcag-level" className="text-sm font-medium flex items-center gap-2">
               WCAG Conformance Level
-              <Tooltip content="Level AA is recommended for ADA compliance">
-                <span className="text-xs text-muted-foreground cursor-help">(?)</span>
-              </Tooltip>
+              <InfoTooltip content="AA (50 criteria) is recommended for ADA compliance. A (25 criteria) is minimum. AAA (78 criteria) is the highest standard." />
             </label>
             <select
               id="wcag-level"
@@ -294,10 +293,13 @@ export function EnhancedScanForm({ onScan, isScanning }: EnhancedScanFormProps) 
               disabled={isScanning}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="A">Level A (Minimum) - Basic accessibility</option>
-              <option value="AA">Level AA (Recommended) - Standard compliance</option>
-              <option value="AAA">Level AAA (Enhanced) - Highest level</option>
+              <option value="A">Level A - Basic (25 criteria)</option>
+              <option value="AA">Level AA - Recommended (50 criteria) ⭐</option>
+              <option value="AAA">Level AAA - Enhanced (78 criteria)</option>
             </select>
+            <p className="text-xs text-muted-foreground">
+              Level AA meets ADA, Section 508, and most legal requirements
+            </p>
           </div>
 
           {/* Estimated Time */}

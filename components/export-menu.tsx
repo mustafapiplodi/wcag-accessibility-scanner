@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Tooltip } from "@/components/ui/tooltip"
 import {
   Download,
   FileJson,
@@ -139,14 +140,18 @@ View full report at: ${window.location.href}
 
   return (
     <div className="relative">
-      <Button
-        variant="outline"
-        onClick={() => setIsOpen(!isOpen)}
-        className="gap-2"
-      >
-        <Download className="h-4 w-4" />
-        Export Report
-      </Button>
+      <Tooltip content="Download report in multiple formats: PDF, Excel, CSV, JSON, HTML">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setIsOpen(!isOpen)}
+          className="gap-2"
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Export Report</span>
+          <span className="sm:hidden">Export</span>
+        </Button>
+      </Tooltip>
 
       <AnimatePresence>
         {isOpen && (

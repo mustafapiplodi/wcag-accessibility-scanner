@@ -18,6 +18,7 @@ import {
   Filter,
 } from "lucide-react"
 import type { Violation } from "@/lib/scanner/types"
+import { getViolationPriority, getEstimatedFixTime, isQuickWin } from "@/lib/violation-priority"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { useTheme } from "next-themes"
@@ -257,6 +258,16 @@ export function EnhancedViolationList({
                   >
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {(() => {
+                          const priority = getViolationPriority(violation)
+                          return (
+                            <Tooltip content={priority.description}>
+                              <Badge className={`${priority.bgColor} ${priority.color} border`}>
+                                {priority.label}
+                              </Badge>
+                            </Tooltip>
+                          )
+                        })()}
                         <Badge
                           variant={
                             violation.severity === "critical"
@@ -270,12 +281,25 @@ export function EnhancedViolationList({
                         >
                           {violation.severity}
                         </Badge>
+                        {isQuickWin(violation) && (
+                          <Tooltip content="Easy to fix with high impact - recommended to fix first">
+                            <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-800">
+                              ⚡ Quick Win
+                            </Badge>
+                          </Tooltip>
+                        )}
                         <span className="font-semibold">{violation.help}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {violation.nodes.length} element
-                        {violation.nodes.length !== 1 ? "s" : ""} affected
-                      </p>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span>
+                          {violation.nodes.length} element
+                          {violation.nodes.length !== 1 ? "s" : ""} affected
+                        </span>
+                        <span className="text-xs">•</span>
+                        <span className="text-xs">
+                          Est. fix time: {getEstimatedFixTime(violation)}
+                        </span>
+                      </div>
                     </div>
                     <button
                       className="p-1 hover:bg-accent rounded transition-colors"

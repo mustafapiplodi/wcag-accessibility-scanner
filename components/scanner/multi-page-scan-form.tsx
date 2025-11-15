@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Globe, Settings2 } from "lucide-react"
+import { InfoTooltip } from "@/components/ui/info-tooltip"
 import { motion, AnimatePresence } from "framer-motion"
 import { Separator } from "@/components/ui/separator"
 
@@ -70,8 +71,9 @@ export function MultiPageScanForm({ onScan, isScanning }: MultiPageScanFormProps
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Max Pages */}
             <div className="space-y-2">
-              <label htmlFor="max-pages" className="text-sm font-medium">
+              <label htmlFor="max-pages" className="text-sm font-medium flex items-center gap-2">
                 Max Pages
+                <InfoTooltip content="Maximum number of pages to scan. Higher numbers take longer but provide more comprehensive results." />
               </label>
               <Input
                 id="max-pages"
@@ -83,14 +85,15 @@ export function MultiPageScanForm({ onScan, isScanning }: MultiPageScanFormProps
                 disabled={isScanning}
               />
               <p className="text-xs text-muted-foreground">
-                Maximum pages to scan
+                Recommended: 10-20 for quick scan, 50+ for full site audit
               </p>
             </div>
 
             {/* Max Depth */}
             <div className="space-y-2">
-              <label htmlFor="max-depth" className="text-sm font-medium">
+              <label htmlFor="max-depth" className="text-sm font-medium flex items-center gap-2">
                 Max Depth
+                <InfoTooltip content="How many clicks from the starting page. Depth 1 = homepage only, Depth 2 = homepage + linked pages, etc." />
               </label>
               <Input
                 id="max-depth"
@@ -102,14 +105,15 @@ export function MultiPageScanForm({ onScan, isScanning }: MultiPageScanFormProps
                 disabled={isScanning}
               />
               <p className="text-xs text-muted-foreground">
-                How deep to crawl
+                Typical sites: 3-5 levels deep
               </p>
             </div>
 
             {/* WCAG Level */}
             <div className="space-y-2">
-              <label htmlFor="crawl-wcag-level" className="text-sm font-medium">
+              <label htmlFor="crawl-wcag-level" className="text-sm font-medium flex items-center gap-2">
                 WCAG Level
+                <InfoTooltip content="AA is recommended for ADA compliance and meets most legal requirements worldwide." />
               </label>
               <select
                 id="crawl-wcag-level"
@@ -118,9 +122,9 @@ export function MultiPageScanForm({ onScan, isScanning }: MultiPageScanFormProps
                 disabled={isScanning}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="A">Level A</option>
-                <option value="AA">Level AA</option>
-                <option value="AAA">Level AAA</option>
+                <option value="A">Level A - Basic</option>
+                <option value="AA">Level AA - Recommended ⭐</option>
+                <option value="AAA">Level AAA - Enhanced</option>
               </select>
             </div>
           </div>

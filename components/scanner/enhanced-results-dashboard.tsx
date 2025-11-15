@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { EnhancedViolationList } from "./enhanced-violation-list"
 import { ViolationCharts } from "@/components/charts/violation-charts"
 import { ExportMenu } from "@/components/export-menu"
+import { QuickWins } from "./quick-wins"
 import type { ScanResult } from "@/lib/scanner/types"
-import { AlertCircle, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Share2 } from "lucide-react"
+import { AlertCircle, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Share2, GitCompare, Info, ExternalLink } from "lucide-react"
 import { motion } from "framer-motion"
 import confetti from "canvas-confetti"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import toast from "react-hot-toast"
 
 interface EnhancedResultsDashboardProps {
   results: ScanResult
+  onCompare?: () => void
 }
 
 // Animated counter component
@@ -61,13 +63,62 @@ function getGrade(score: number): { grade: string; color: string; bgColor: strin
   return { grade: "F", color: "text-red-600", bgColor: "bg-red-100 dark:bg-red-900/30" }
 }
 
-export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardProps) {
+// Get score explanation and recommendations
+function getScoreExplanation(score: number, totalViolations: number): {
+  explanation: string;
+  recommendation: string;
+  complianceStatus: string;
+} {
+  if (score >= 95) {
+    return {
+      explanation: "Excellent! Your site has outstanding accessibility.",
+      recommendation: "Continue monitoring with regular scans to maintain this high standard.",
+      complianceStatus: "Likely compliant with WCAG 2.2 Level AA and ADA requirements"
+    }
+  }
+  if (score >= 90) {
+    return {
+      explanation: "Great job! Your site has strong accessibility with only minor issues.",
+      recommendation: "Fix the remaining violations to achieve perfect compliance.",
+      complianceStatus: "Very close to full WCAG 2.2 Level AA compliance"
+    }
+  }
+  if (score >= 80) {
+    return {
+      explanation: "Good progress, but some important accessibility issues need attention.",
+      recommendation: "Focus on fixing high-priority violations first for maximum impact.",
+      complianceStatus: "Partial WCAG compliance - work needed for full ADA compliance"
+    }
+  }
+  if (score >= 70) {
+    return {
+      explanation: "Your site has moderate accessibility issues that should be addressed.",
+      recommendation: "Start with Quick Wins, then tackle critical violations systematically.",
+      complianceStatus: "Below recommended WCAG 2.2 Level AA standards"
+    }
+  }
+  if (score >= 60) {
+    return {
+      explanation: "Significant accessibility barriers are present on your site.",
+      recommendation: "Immediate action needed. Fix critical violations to reduce legal risk.",
+      complianceStatus: "Does not meet ADA or WCAG compliance requirements"
+    }
+  }
+  return {
+    explanation: "Your site has serious accessibility issues requiring urgent attention.",
+    recommendation: "Address critical violations immediately to avoid legal exposure and improve user experience.",
+    complianceStatus: "Major compliance gaps - high risk of ADA lawsuits"
+  }
+}
+
+export function EnhancedResultsDashboard({ results, onCompare }: EnhancedResultsDashboardProps) {
   const { summary, violations, url, timestamp } = results
   const [previousScore, setPreviousScore] = useState<number | null>(null)
 
   const totalViolations = Object.values(violations).reduce((sum, arr) => sum + arr.length, 0)
   const score = calculateScore(summary)
   const gradeInfo = getGrade(score)
+  const scoreExplanation = getScoreExplanation(score, totalViolations)
 
   // Trigger confetti for perfect scores
   useEffect(() => {
@@ -133,6 +184,14 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
               </div>
 
               <div className="flex gap-2">
+                {onCompare && (
+                  <Tooltip content="Compare with previous scans">
+                    <Button variant="outline" size="sm" onClick={onCompare} className="gap-2">
+                      <GitCompare className="h-4 w-4" />
+                      <span className="hidden sm:inline">Compare</span>
+                    </Button>
+                  </Tooltip>
+                )}
                 <Tooltip content="Share results">
                   <Button variant="outline" size="sm" onClick={handleShare}>
                     <Share2 className="h-4 w-4" />
@@ -153,9 +212,14 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
       >
         <Card className={`${gradeInfo.bgColor} border-2`}>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">Accessibility Score</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-semibold">Accessibility Score</h3>
+                  <Tooltip content="Score is calculated as: (Passed Tests / Total Tests) × 100. Higher scores indicate better accessibility compliance.">
+                    <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
+                  </Tooltip>
+                </div>
                 <div className="flex items-baseline gap-3">
                   <motion.div
                     className={`text-6xl font-bold ${gradeInfo.color}`}
@@ -204,6 +268,28 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
               >
                 {gradeInfo.grade}
               </motion.div>
+            </div>
+
+            {/* Score Explanation */}
+            <div className="border-t pt-4 space-y-3">
+              <div>
+                <p className="font-medium mb-1">{scoreExplanation.explanation}</p>
+                <p className="text-sm text-muted-foreground">{scoreExplanation.recommendation}</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <Badge variant="outline" className="mt-0.5">
+                  {scoreExplanation.complianceStatus}
+                </Badge>
+                <a
+                  href="https://www.w3.org/WAI/WCAG22/quickref/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  Learn about WCAG 2.2 standards
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -319,6 +405,17 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
         </motion.div>
       )}
 
+      {/* Quick Wins Section */}
+      {totalViolations > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.55 }}
+        >
+          <QuickWins results={results} />
+        </motion.div>
+      )}
+
       {/* WCAG Principles */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -326,7 +423,10 @@ export function EnhancedResultsDashboard({ results }: EnhancedResultsDashboardPr
         transition={{ duration: 0.5, delay: 0.6 }}
         className="space-y-6"
       >
-        <h2 className="text-2xl font-bold">WCAG 2.2 Compliance Issues</h2>
+        <h2 className="text-2xl font-bold">All Accessibility Issues</h2>
+        <p className="text-muted-foreground">
+          Full breakdown by WCAG 2.2 principle. Fix Quick Wins first for maximum impact with minimal effort.
+        </p>
 
         <EnhancedViolationList
           title="Perceivable Issues"
